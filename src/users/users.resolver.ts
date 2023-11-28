@@ -16,6 +16,7 @@ export class UsersResolver {
 
   @Mutation((returns) => LogInResponse)
   logIn(@Args('input') input: LogInInput): Promise<LogInResponse> {
+    input.email = input.email.toLowerCase();
     return this.authService.logIn(input);
   }
 }

@@ -1,22 +1,35 @@
-import { Field, GraphQLISODateTime, Int, ObjectType } from '@nestjs/graphql';
+import { Field, GraphQLISODateTime, ObjectType } from '@nestjs/graphql';
+import {
+  Column,
+  CreateDateColumn,
+  Entity,
+  PrimaryGeneratedColumn,
+} from 'typeorm';
 
 @ObjectType()
+@Entity()
 export class User {
-  @Field((type) => Int)
-  id: number;
+  @Field()
+  @PrimaryGeneratedColumn('uuid')
+  id: string;
 
   @Field()
+  @Column({ length: 256 })
   firstName: string;
 
   @Field()
+  @Column({ length: 256 })
   lastName: string;
 
   @Field()
+  @Column({ unique: true, length: 256 })
   email: string;
 
   @Field()
+  @Column({ length: 256 })
   password: string;
 
   @Field((type) => GraphQLISODateTime)
+  @CreateDateColumn()
   createdAt: Date;
 }

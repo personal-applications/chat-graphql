@@ -3,6 +3,8 @@ import { ApolloDriver, ApolloDriverConfig } from '@nestjs/apollo';
 import { Module } from '@nestjs/common';
 import { GraphQLModule } from '@nestjs/graphql';
 import { UsersModule } from './users/users.module';
+import { DatabaseModule } from './database/database.module';
+import { ConfigModule } from './config/config.module';
 
 @Module({
   imports: [
@@ -14,6 +16,8 @@ import { UsersModule } from './users/users.module';
       plugins: [ApolloServerPluginLandingPageLocalDefault()],
     }),
     UsersModule,
+    DatabaseModule,
+    ConfigModule,
   ],
 })
 export class AppModule {}
