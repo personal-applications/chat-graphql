@@ -13,4 +13,8 @@ export class UserRepository {
   findUserByEmail(email: string) {
     return this.userRepository.findOne({ where: { email } });
   }
+
+  create(user: User) {
+    return this.userRepository.save(user);
+  }
 }

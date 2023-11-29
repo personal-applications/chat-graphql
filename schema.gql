@@ -2,33 +2,41 @@
 # THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
 # ------------------------------------------------------
 
-type User {
-  id: String!
-  firstName: String!
-  lastName: String!
-  email: String!
-  password: String!
-  createdAt: DateTime!
-}
-
 """
 A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date-time format.
 """
 scalar DateTime
 
+input LogInInput {
+  email: String!
+  password: String!
+}
+
 type LogInResponse {
   jwt: String!
+}
+
+type Mutation {
+  logIn(input: LogInInput!): LogInResponse!
+  register(input: RegisterInput!): Boolean!
 }
 
 type Query {
   users: [User!]!
 }
 
-type Mutation {
-  logIn(input: LogInInput!): LogInResponse!
+input RegisterInput {
+  email: String!
+  firstName: String!
+  lastName: String!
+  password: String!
 }
 
-input LogInInput {
+type User {
+  createdAt: DateTime!
   email: String!
+  firstName: String!
+  id: String!
+  lastName: String!
   password: String!
 }
