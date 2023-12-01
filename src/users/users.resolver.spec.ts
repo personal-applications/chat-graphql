@@ -16,6 +16,7 @@ describe('UserResolver', () => {
   let app: INestApplication;
   const userRepositoryMock = {
     findUserByEmail: jest.fn(),
+    create: jest.fn(),
   };
 
   beforeEach(async () => {
@@ -50,6 +51,61 @@ describe('UserResolver', () => {
 
   afterEach(async () => {
     await app.close();
+  });
+
+  describe('register', () => {
+    it('should register a user successfully', async () => {
+      userRepositoryMock.findUserByEmail.mockResolvedValue(null);
+      const createSpy = jest.spyOn(userRepositoryMock, 'create');
+
+      const { body } = await request(app.getHttpServer())
+        .post('/graphql')
+        .send({
+          query: `
+          mutation {
+            register(input: { password: "12345678", email: "email@email.com", firstName: "firstName", lastName: "lastName" })
+          }
+        `,
+        });
+
+      expect(body.data.register).toEqual(true);
+      expect(createSpy).toHaveBeenCalledTimes(1);
+    });
+
+    it('should throw invalid email error if email is not valid', async () => {
+      userRepositoryMock.findUserByEmail.mockResolvedValue({
+        email: 'email@email.com',
+      });
+
+      const { body } = await request(app.getHttpServer())
+        .post('/graphql')
+        .send({
+          query: `
+            mutation {
+              register(input: { password: "12345678", email: "email@email.com", firstName: "firstName", lastName: "lastName" })
+            }
+          `,
+        });
+
+      expect(body.errors[0].message).toEqual('Email already exists.');
+    });
+
+    it('should throw validation error if email is not provided', async () => {
+      const { body } = await request(app.getHttpServer())
+        .post('/graphql')
+        .send({
+          query: `
+            mutation {
+              register(input: { password: "12345678" })
+            }
+          `,
+        })
+        .expect(StatusCodes.BAD_REQUEST);
+
+      expect(body.errors[0].message).toEqual(
+        'Field "RegisterInput.email" of required type "String!" was not provided.',
+      );
+    });
   });
 
   describe('logIn', () => {
