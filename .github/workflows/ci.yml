@@ -1,9 +1,7 @@
 name: CI
 on:
   push:
-
-concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
+  workflow_dispatch:
 
 jobs:
   unit_test:
