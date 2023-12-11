@@ -3,7 +3,12 @@ import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
 import { GraphQLError } from 'graphql';
 import { ReasonPhrases, StatusCodes } from 'http-status-codes';
+import { MailService } from 'src/mail/mail.service';
 import { CONFIG, Config } from '../config/config.provider';
+import {
+  ForgotPasswordInput,
+  ForgotPasswordResponse,
+} from './dto/forgot-password.dto';
 import { LogInInput, LogInResponse } from './dto/login.dto';
 import { User } from './models/user.model';
 import { UserRepository } from './users.repository';
@@ -15,7 +20,30 @@ export class AuthService {
     private readonly jwtService: JwtService,
     @Inject(CONFIG)
     private readonly config: Config,
+    private readonly mailService: MailService,
   ) {}
+
+  async forgotPassword(
+    input: ForgotPasswordInput,
+  ): Promise<ForgotPasswordResponse> {
+    const user = await this.userRepository.findUserByEmail(input.email);
+    if (!user) {
+      throw new GraphQLError('Email is not available', {
+        extensions: {
+          code: ReasonPhrases.BAD_REQUEST,
+          http: {
+            code: StatusCodes.BAD_REQUEST,
+          },
+        },
+      });
+    }
+
+    await this.mailService.sendForgotPasswordEmail(input.email);
+
+    return {
+      message: 'Hello',
+    };
+  }
 
   createJWT(user: User) {
     return this.jwtService.sign(
