@@ -1,10 +1,5 @@
 import { Field, GraphQLISODateTime, ObjectType } from '@nestjs/graphql';
-import {
-  Column,
-  CreateDateColumn,
-  Entity,
-  PrimaryGeneratedColumn,
-} from 'typeorm';
+import { Column, CreateDateColumn, Entity, PrimaryGeneratedColumn } from 'typeorm';
 
 @ObjectType()
 @Entity()
@@ -24,6 +19,9 @@ export class User {
   @Field()
   @Column({ unique: true, length: 256 })
   email: string;
+
+  @Column({ length: 256 })
+  forgotPasswordSecret: string;
 
   @Field()
   @Column({ length: 256 })

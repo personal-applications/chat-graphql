@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import * as bcrypt from 'bcrypt';
 import { GraphQLError } from 'graphql';
 import { ReasonPhrases, StatusCodes } from 'http-status-codes';
+import crypto from 'node:crypto';
 import { RegisterInput } from './dto/register.dto';
 import { User } from './models/user.model';
 import { UserRepository } from './users.repository';
@@ -26,6 +27,7 @@ export class UsersService {
     input.password = bcrypt.hashSync(input.password, 10);
     user = new User();
     Object.assign(user, input);
+    user.forgotPasswordSecret = crypto.randomBytes(20).toString('hex');
 
     await this.userRepository.create(user);
     return true;

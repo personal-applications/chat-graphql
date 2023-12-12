@@ -1,11 +1,12 @@
 import { ApolloDriver, ApolloDriverConfig } from '@nestjs/apollo';
 import { INestApplication, ValidationPipe } from '@nestjs/common';
 import { GraphQLModule } from '@nestjs/graphql';
-import { JwtModule } from '@nestjs/jwt';
+import { JwtModule, JwtService } from '@nestjs/jwt';
 import { Test } from '@nestjs/testing';
 import { StatusCodes } from 'http-status-codes';
-import { MailModule } from 'src/mail/mail.module';
-import * as request from 'supertest';
+import { CONFIG, Config } from 'src/config/config.provider';
+import { MailService } from 'src/mail/mail.service';
+import request from 'supertest';
 import { ConfigModule } from '../config/config.module';
 import { DatabaseModule } from '../database/database.module';
 import { AuthService } from './auth.service';
@@ -19,6 +20,11 @@ describe('UserResolver', () => {
     findUserByEmail: jest.fn(),
     create: jest.fn(),
   };
+  const mailServiceMock = {
+    sendForgotPasswordEmail: jest.fn(),
+  };
+  let jwtService: JwtService;
+  let config: Config;
 
   beforeEach(async () => {
     const module = await Test.createTestingModule({
@@ -30,7 +36,6 @@ describe('UserResolver', () => {
         DatabaseModule,
         JwtModule.register({}),
         ConfigModule,
-        MailModule,
       ],
       providers: [
         UsersResolver,
@@ -40,11 +45,17 @@ describe('UserResolver', () => {
           provide: UserRepository,
           useValue: userRepositoryMock,
         },
+        {
+          provide: MailService,
+          useValue: mailServiceMock,
+        },
       ],
     }).compile();
 
     jest.clearAllMocks();
 
+    jwtService = module.get<JwtService>(JwtService);
+    config = module.get<Config>(CONFIG);
     app = module.createNestApplication();
     app.useGlobalPipes(new ValidationPipe());
 
@@ -53,6 +64,86 @@ describe('UserResolver', () => {
 
   afterEach(async () => {
     await app.close();
+  });
+
+  describe('forgotPassword', () => {
+    it('should send email if user exists', async () => {
+      userRepositoryMock.findUserByEmail.mockResolvedValue({
+        id: 'id',
+        email: 'email@email.com',
+        forgotPasswordSecret: 'forgotPasswordSecret',
+        firstName: 'firstName',
+        lastName: 'lastName',
+      });
+
+      const sendForgotPasswordEmailSpy = jest.spyOn(mailServiceMock, 'sendForgotPasswordEmail');
+
+      const { body } = await request(app.getHttpServer())
+        .post('/graphql')
+        .send({
+          query: `
+          mutation {
+            forgotPassword(input: { email: "email@email.com" }) {
+              message
+            }
+          }
+        `,
+        });
+
+      expect(body.data.forgotPassword.message).toEqual(
+        "Great! We've sent a password reset email. Check your inbox, and once you reset your password, you'll be back in action. If you don't see the email, please check your spam folder.",
+      );
+      expect(sendForgotPasswordEmailSpy).toHaveBeenCalledTimes(1);
+
+      const sendForgotPasswordEmailCall = sendForgotPasswordEmailSpy.mock.calls[0];
+      expect(sendForgotPasswordEmailCall[0]).toEqual('firstName lastName');
+      expect(sendForgotPasswordEmailCall[1]).toEqual('email@email.com');
+
+      const resetLink = sendForgotPasswordEmailCall[2];
+      const url = new URL(resetLink);
+      const token = url.searchParams.get('token');
+      const decoded = jwtService.decode(token);
+      expect(decoded.exp - decoded.iat).toEqual(config.expiresIn);
+      expect(decoded.email).toEqual('email@email.com');
+    });
+
+    it('should not send email if user does not exist', async () => {
+      userRepositoryMock.findUserByEmail.mockResolvedValue(null);
+      const sendForgotPasswordEmailSpy = jest.spyOn(mailServiceMock, 'sendForgotPasswordEmail');
+
+      const { body } = await request(app.getHttpServer())
+        .post('/graphql')
+        .send({
+          query: `
+          mutation {
+            forgotPassword(input: { email: "email@email.com" }) {
+              message
+            }
+          }
+        `,
+        });
+
+      expect(body.data.forgotPassword.message).toEqual(
+        "Great! We've sent a password reset email. Check your inbox, and once you reset your password, you'll be back in action. If you don't see the email, please check your spam folder.",
+      );
+      expect(sendForgotPasswordEmailSpy).toHaveBeenCalledTimes(0);
+    });
+
+    it('should throw validation is email is not provided', async () => {
+      const { body } = await request(app.getHttpServer())
+        .post('/graphql')
+        .send({
+          query: `
+          mutation {
+            forgotPassword(input: {}) {
+              message
+            }
+          }
+        `,
+        });
+
+      expect(body.errors[0].message).toEqual('Field "ForgotPasswordInput.email" of required type "String!" was not provided.');
+    });
   });
 
   describe('register', () => {
@@ -104,9 +195,7 @@ describe('UserResolver', () => {
         })
         .expect(StatusCodes.BAD_REQUEST);
 
-      expect(body.errors[0].message).toEqual(
-        'Field "RegisterInput.email" of required type "String!" was not provided.',
-      );
+      expect(body.errors[0].message).toEqual('Field "RegisterInput.email" of required type "String!" was not provided.');
     });
   });
 
@@ -167,9 +256,7 @@ describe('UserResolver', () => {
         })
         .expect(StatusCodes.BAD_REQUEST);
 
-      expect(body.errors[0].message).toEqual(
-        'Field "LogInInput.email" of required type "String!" was not provided.',
-      );
+      expect(body.errors[0].message).toEqual('Field "LogInInput.email" of required type "String!" was not provided.');
     });
   });
 });

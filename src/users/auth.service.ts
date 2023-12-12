@@ -1,14 +1,11 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
-import * as bcrypt from 'bcrypt';
+import bcrypt from 'bcrypt';
 import { GraphQLError } from 'graphql';
 import { ReasonPhrases, StatusCodes } from 'http-status-codes';
 import { MailService } from 'src/mail/mail.service';
 import { CONFIG, Config } from '../config/config.provider';
-import {
-  ForgotPasswordInput,
-  ForgotPasswordResponse,
-} from './dto/forgot-password.dto';
+import { ForgotPasswordInput, ForgotPasswordResponse } from './dto/forgot-password.dto';
 import { LogInInput, LogInResponse } from './dto/login.dto';
 import { User } from './models/user.model';
 import { UserRepository } from './users.repository';
@@ -23,26 +20,31 @@ export class AuthService {
     private readonly mailService: MailService,
   ) {}
 
-  async forgotPassword(
-    input: ForgotPasswordInput,
-  ): Promise<ForgotPasswordResponse> {
+  async forgotPassword(input: ForgotPasswordInput): Promise<ForgotPasswordResponse> {
     const user = await this.userRepository.findUserByEmail(input.email);
-    if (!user) {
-      throw new GraphQLError('Email is not available', {
-        extensions: {
-          code: ReasonPhrases.BAD_REQUEST,
-          http: {
-            code: StatusCodes.BAD_REQUEST,
-          },
-        },
-      });
+    if (user) {
+      const userName = user.firstName + ' ' + user.lastName;
+      const resetLink = `${this.config.frontendUrl}/reset-password?token=${this.createForgotPasswordJWT(user)}`;
+      await this.mailService.sendForgotPasswordEmail(userName, input.email, resetLink);
     }
 
-    await this.mailService.sendForgotPasswordEmail(input.email);
-
     return {
-      message: 'Hello',
+      message:
+        "Great! We've sent a password reset email. Check your inbox, and once you reset your password, you'll be back in action. If you don't see the email, please check your spam folder.",
     };
+  }
+
+  createForgotPasswordJWT(user: User) {
+    return this.jwtService.sign(
+      {
+        email: user.email,
+      },
+      {
+        secret: user.forgotPasswordSecret,
+        expiresIn: this.config.expiresIn,
+        subject: user.id,
+      },
+    );
   }
 
   createJWT(user: User) {
