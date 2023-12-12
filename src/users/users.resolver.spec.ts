@@ -4,6 +4,7 @@ import { GraphQLModule } from '@nestjs/graphql';
 import { JwtModule } from '@nestjs/jwt';
 import { Test } from '@nestjs/testing';
 import { StatusCodes } from 'http-status-codes';
+import { MailModule } from 'src/mail/mail.module';
 import * as request from 'supertest';
 import { ConfigModule } from '../config/config.module';
 import { DatabaseModule } from '../database/database.module';
@@ -29,6 +30,7 @@ describe('UserResolver', () => {
         DatabaseModule,
         JwtModule.register({}),
         ConfigModule,
+        MailModule,
       ],
       providers: [
         UsersResolver,
