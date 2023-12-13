@@ -3,6 +3,7 @@ import { INestApplication, ValidationPipe } from '@nestjs/common';
 import { GraphQLModule } from '@nestjs/graphql';
 import { JwtModule, JwtService } from '@nestjs/jwt';
 import { Test } from '@nestjs/testing';
+import bcrypt from 'bcrypt';
 import { StatusCodes } from 'http-status-codes';
 import { CONFIG, Config } from 'src/config/config.provider';
 import { MailService } from 'src/mail/mail.service';
@@ -200,6 +201,30 @@ describe('UserResolver', () => {
   });
 
   describe('logIn', () => {
+    it('should log in successfully', async () => {
+      userRepositoryMock.findUserByEmail.mockResolvedValue({
+        id: 'id',
+        email: 'email@email.com',
+        password: await bcrypt.hash('password', 10),
+      });
+
+      const { body } = await request(app.getHttpServer())
+        .post('/graphql')
+        .send({
+          query: `
+          mutation {
+            logIn(input: { email: "email@email.com", password: "password" }) {
+              jwt
+            }
+          }
+        `,
+        });
+
+      const decoded = jwtService.decode(body.data.logIn.jwt);
+      expect(decoded.exp - decoded.iat).toEqual(config.expiresIn);
+      expect(decoded.email).toEqual('email@email.com');
+    });
+
     it('should throw credentials error when password is incorrect', async () => {
       userRepositoryMock.findUserByEmail.mockResolvedValue({
         password: 'password',

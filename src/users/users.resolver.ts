@@ -1,9 +1,6 @@
 import { Args, Mutation, Query, Resolver } from '@nestjs/graphql';
 import { AuthService } from './auth.service';
-import {
-  ForgotPasswordInput,
-  ForgotPasswordResponse,
-} from './dto/forgot-password.dto';
+import { ForgotPasswordInput, ForgotPasswordResponse } from './dto/forgot-password.dto';
 import { LogInInput, LogInResponse } from './dto/login.dto';
 import { RegisterInput } from './dto/register.dto';
 import { User } from './models/user.model';
