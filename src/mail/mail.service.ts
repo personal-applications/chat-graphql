@@ -1,5 +1,5 @@
 import { Inject, Injectable, Logger } from '@nestjs/common';
-import * as pug from 'pug';
+import pug from 'pug';
 import { Resend } from 'resend';
 import { CONFIG, Config } from 'src/config/config.provider';
 
