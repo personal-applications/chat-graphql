@@ -3,6 +3,7 @@ import { AuthService } from './auth.service';
 import { ForgotPasswordInput, ForgotPasswordResponse } from './dto/forgot-password.dto';
 import { LogInInput, LogInResponse } from './dto/login.dto';
 import { RegisterInput } from './dto/register.dto';
+import { ResetPasswordInput, ResetPasswordResponse } from './dto/reset-password.dto';
 import { User } from './models/user.model';
 import { UsersService } from './users.service';
 
@@ -15,6 +16,11 @@ export class UsersResolver {
 
   @Query((returns) => [User])
   async users() {}
+
+  @Mutation((returns) => ResetPasswordResponse)
+  resetPassword(@Args('input') input: ResetPasswordInput) {
+    return this.authService.resetPassword(input);
+  }
 
   @Mutation((returns) => ForgotPasswordResponse)
   forgotPassword(@Args('input') input: ForgotPasswordInput) {

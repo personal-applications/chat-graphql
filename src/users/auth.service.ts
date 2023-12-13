@@ -1,17 +1,21 @@
-import { Inject, Injectable } from '@nestjs/common';
+import { Inject, Injectable, Logger } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import bcrypt from 'bcrypt';
 import { GraphQLError } from 'graphql';
 import { ReasonPhrases, StatusCodes } from 'http-status-codes';
+import crypto from 'node:crypto';
 import { MailService } from 'src/mail/mail.service';
 import { CONFIG, Config } from '../config/config.provider';
 import { ForgotPasswordInput, ForgotPasswordResponse } from './dto/forgot-password.dto';
 import { LogInInput, LogInResponse } from './dto/login.dto';
+import { ResetPasswordInput, ResetPasswordResponse } from './dto/reset-password.dto';
 import { User } from './models/user.model';
 import { UserRepository } from './users.repository';
 
 @Injectable()
 export class AuthService {
+  private logger = new Logger(AuthService.name);
+
   constructor(
     private readonly userRepository: UserRepository,
     private readonly jwtService: JwtService,
@@ -19,6 +23,47 @@ export class AuthService {
     private readonly config: Config,
     private readonly mailService: MailService,
   ) {}
+
+  async resetPassword(input: ResetPasswordInput): Promise<ResetPasswordResponse> {
+    const decoded = this.jwtService.decode(input.token);
+    const user = await this.userRepository.findUserByEmail(decoded['email']);
+    if (!user) {
+      throw new GraphQLError('Invalid token.', {
+        extensions: {
+          code: ReasonPhrases.BAD_REQUEST,
+          http: {
+            status: StatusCodes.BAD_REQUEST,
+          },
+        },
+      });
+    }
+
+    let email: string;
+    try {
+      const verifiedInfos = this.jwtService.verify(input.token, { secret: user.forgotPasswordSecret });
+      email = verifiedInfos['email'];
+    } catch (error) {
+      this.logger.error(`Verify token error: ${JSON.stringify(error, null, 2)}`);
+      throw new GraphQLError('Invalid token.', {
+        extensions: {
+          code: ReasonPhrases.BAD_REQUEST,
+          http: {
+            status: StatusCodes.BAD_REQUEST,
+          },
+        },
+      });
+    }
+
+    const newForgotPasswordSecret = crypto.randomBytes(20).toString('hex');
+    const newPassword = bcrypt.hashSync(input.password, 10);
+    await this.userRepository.updateOneByEmail(email, { forgotPasswordSecret: newForgotPasswordSecret, password: newPassword });
+
+    await this.mailService.sendResetPasswordConfirmationEmail(email, user.firstName + ' ' + user.lastName);
+
+    return {
+      message: 'Your password has been successfully reset.',
+    };
+  }
 
   async forgotPassword(input: ForgotPasswordInput): Promise<ForgotPasswordResponse> {
     const user = await this.userRepository.findUserByEmail(input.email);

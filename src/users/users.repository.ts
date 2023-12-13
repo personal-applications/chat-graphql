@@ -17,4 +17,8 @@ export class UserRepository {
   create(user: User) {
     return this.userRepository.save(user);
   }
+
+  updateOneByEmail(email: string, info: Partial<User>) {
+    return this.userRepository.update({ email }, info);
+  }
 }
