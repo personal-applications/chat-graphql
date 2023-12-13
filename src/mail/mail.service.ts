@@ -33,7 +33,7 @@ export class MailService {
         from: 'No reply <no-reply@trungpham.tech>',
         to: [email],
         subject: 'Password Reset Confirmation',
-        text: this.compiledResetPasswordTemplate({
+        html: this.compiledResetPasswordTemplate({
           userName,
           email,
         }),
@@ -50,7 +50,7 @@ export class MailService {
         from: 'No reply <no-reply@trungpham.tech>',
         to: [email],
         subject: 'Password reset',
-        text: this.compiledForgotPasswordTemplate({
+        html: this.compiledForgotPasswordTemplate({
           userName,
           resetLink,
           email,
