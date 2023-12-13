@@ -26,7 +26,7 @@ export class AuthService {
 
   async resetPassword(input: ResetPasswordInput): Promise<ResetPasswordResponse> {
     const decoded = this.jwtService.decode(input.token);
-    const user = await this.userRepository.findUserByEmail(decoded['email']);
+    const user = await this.userRepository.findUserByEmail(decoded?.email ?? '');
     if (!user) {
       throw new GraphQLError('Invalid token.', {
         extensions: {
@@ -70,7 +70,7 @@ export class AuthService {
     if (user) {
       const userName = user.firstName + ' ' + user.lastName;
       const resetLink = `${this.config.frontendUrl}/reset-password?token=${this.createForgotPasswordJWT(user)}`;
-      await this.mailService.sendForgotPasswordEmail(userName, input.email, resetLink);
+      await this.mailService.sendForgotPasswordEmail(input.email, userName, resetLink);
     }
 
     return {
