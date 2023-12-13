@@ -16,14 +16,14 @@ export class UsersResolver {
   @Query((returns) => [User])
   async users() {}
 
-  @Mutation(() => ForgotPasswordResponse)
+  @Mutation((returns) => ForgotPasswordResponse)
   forgotPassword(@Args('input') input: ForgotPasswordInput) {
     input.email = input.email.toLocaleLowerCase();
 
     return this.authService.forgotPassword(input);
   }
 
-  @Mutation(() => Boolean)
+  @Mutation((returns) => Boolean)
   register(@Args('input') input: RegisterInput): Promise<boolean> {
     input.email = input.email.toLowerCase();
 
