@@ -1,5 +1,6 @@
 import { Field, GraphQLISODateTime, ObjectType } from '@nestjs/graphql';
-import { Column, CreateDateColumn, Entity, PrimaryGeneratedColumn } from 'typeorm';
+import { Message } from 'src/message/models/message.model';
+import { Column, CreateDateColumn, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
 
 @ObjectType()
 @Entity()
@@ -26,6 +27,12 @@ export class User {
   @Field()
   @Column({ length: 256 })
   password: string;
+
+  @OneToMany((type) => Message, (message) => message.from)
+  receivedMessages: Message[];
+
+  @OneToMany((type) => Message, (message) => message.to)
+  sentMessages: Message[];
 
   @Field((type) => GraphQLISODateTime)
   @CreateDateColumn()

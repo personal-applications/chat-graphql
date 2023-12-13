@@ -11,12 +11,6 @@ import { UsersService } from './users.service';
 
 @Module({
   imports: [DatabaseModule, JwtModule.register({}), ConfigModule, MailModule],
-  providers: [
-    UsersResolver,
-    UsersService,
-    AuthService,
-    UserRepository,
-    ...userProviders,
-  ],
+  providers: [UsersResolver, UsersService, AuthService, UserRepository, ...userProviders],
 })
 export class UsersModule {}

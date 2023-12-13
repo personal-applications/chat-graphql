@@ -2,10 +2,11 @@ import { ApolloServerPluginLandingPageLocalDefault } from '@apollo/server/plugin
 import { ApolloDriver, ApolloDriverConfig } from '@nestjs/apollo';
 import { Module } from '@nestjs/common';
 import { GraphQLModule } from '@nestjs/graphql';
-import { UsersModule } from './users/users.module';
-import { DatabaseModule } from './database/database.module';
 import { ConfigModule } from './config/config.module';
+import { DatabaseModule } from './database/database.module';
 import { MailModule } from './mail/mail.module';
+import { MessageModule } from './message/message.module';
+import { UsersModule } from './users/users.module';
 
 @Module({
   imports: [
@@ -20,6 +21,7 @@ import { MailModule } from './mail/mail.module';
     DatabaseModule,
     ConfigModule,
     MailModule,
+    MessageModule,
   ],
 })
 export class AppModule {}
