@@ -30,7 +30,7 @@ export class MailService {
   async sendResetPasswordConfirmationEmail(email: string, userName: string) {
     try {
       const data = await this.resend.emails.send({
-        from: 'No reply <no-re@trungpham.tech>',
+        from: 'No reply <no-reply@trungpham.tech>',
         to: [email],
         subject: 'Password Reset Confirmation',
         text: this.compiledResetPasswordTemplate({
@@ -47,7 +47,7 @@ export class MailService {
   async sendForgotPasswordEmail(email: string, userName: string, resetLink: string) {
     try {
       const data = await this.resend.emails.send({
-        from: 'No reply <no-re@trungpham.tech>',
+        from: 'No reply <no-reply@trungpham.tech>',
         to: [email],
         subject: 'Password reset',
         text: this.compiledForgotPasswordTemplate({
