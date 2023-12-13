@@ -97,8 +97,8 @@ describe('UserResolver', () => {
       expect(sendForgotPasswordEmailSpy).toHaveBeenCalledTimes(1);
 
       const sendForgotPasswordEmailCall = sendForgotPasswordEmailSpy.mock.calls[0];
-      expect(sendForgotPasswordEmailCall[0]).toEqual('firstName lastName');
-      expect(sendForgotPasswordEmailCall[1]).toEqual('email@email.com');
+      expect(sendForgotPasswordEmailCall[0]).toEqual('email@email.com');
+      expect(sendForgotPasswordEmailCall[1]).toEqual('firstName lastName');
 
       const resetLink = sendForgotPasswordEmailCall[2];
       const url = new URL(resetLink);
