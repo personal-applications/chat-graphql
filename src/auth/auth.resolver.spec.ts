@@ -7,15 +7,15 @@ import bcrypt from 'bcrypt';
 import { StatusCodes } from 'http-status-codes';
 import { CONFIG, Config } from 'src/config/config.provider';
 import { MailService } from 'src/mail/mail.service';
+import { UserRepository } from 'src/users/users.repository';
+import { UsersService } from 'src/users/users.service';
 import request from 'supertest';
 import { ConfigModule } from '../config/config.module';
 import { DatabaseModule } from '../database/database.module';
+import { AuthResolver } from './auth.resolver';
 import { AuthService } from './auth.service';
-import { UserRepository } from './users.repository';
-import { UsersResolver } from './users.resolver';
-import { UsersService } from './users.service';
 
-describe('UserResolver', () => {
+describe('AuthResolver', () => {
   let app: INestApplication;
   const userRepositoryMock = {
     findUserByEmail: jest.fn(),
@@ -39,7 +39,7 @@ describe('UserResolver', () => {
         ConfigModule,
       ],
       providers: [
-        UsersResolver,
+        AuthResolver,
         UsersService,
         AuthService,
         {

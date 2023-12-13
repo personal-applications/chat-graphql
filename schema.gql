@@ -24,7 +24,16 @@ type LogInResponse {
   jwt: String!
 }
 
+type Message {
+  content: String!
+  createdAt: DateTime!
+  from: User!
+  id: String!
+  to: User!
+}
+
 type Mutation {
+  createMessage: Message!
   forgotPassword(input: ForgotPasswordInput!): ForgotPasswordResponse!
   logIn(input: LogInInput!): LogInResponse!
   register(input: RegisterInput!): Boolean!

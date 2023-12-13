@@ -1,14 +1,14 @@
 import { Args, Mutation, Query, Resolver } from '@nestjs/graphql';
+import { User } from 'src/users/models/user.model';
+import { UsersService } from 'src/users/users.service';
 import { AuthService } from './auth.service';
 import { ForgotPasswordInput, ForgotPasswordResponse } from './dto/forgot-password.dto';
 import { LogInInput, LogInResponse } from './dto/login.dto';
 import { RegisterInput } from './dto/register.dto';
 import { ResetPasswordInput, ResetPasswordResponse } from './dto/reset-password.dto';
-import { User } from './models/user.model';
-import { UsersService } from './users.service';
 
 @Resolver((of) => User)
-export class UsersResolver {
+export class AuthResolver {
   constructor(
     private readonly userService: UsersService,
     private readonly authService: AuthService,

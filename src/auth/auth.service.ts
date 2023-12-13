@@ -6,11 +6,11 @@ import { ReasonPhrases, StatusCodes } from 'http-status-codes';
 import crypto from 'node:crypto';
 import { MailService } from 'src/mail/mail.service';
 import { CONFIG, Config } from '../config/config.provider';
-import { ForgotPasswordInput, ForgotPasswordResponse } from './dto/forgot-password.dto';
-import { LogInInput, LogInResponse } from './dto/login.dto';
-import { ResetPasswordInput, ResetPasswordResponse } from './dto/reset-password.dto';
-import { User } from './models/user.model';
-import { UserRepository } from './users.repository';
+import { ForgotPasswordInput, ForgotPasswordResponse } from '../users/dto/forgot-password.dto';
+import { LogInInput, LogInResponse } from '../users/dto/login.dto';
+import { ResetPasswordInput, ResetPasswordResponse } from '../users/dto/reset-password.dto';
+import { User } from '../users/models/user.model';
+import { UserRepository } from '../users/users.repository';
 
 @Injectable()
 export class AuthService {

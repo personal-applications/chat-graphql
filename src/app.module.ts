@@ -4,9 +4,11 @@ import { Module } from '@nestjs/common';
 import { GraphQLModule } from '@nestjs/graphql';
 import { ConfigModule } from './config/config.module';
 import { DatabaseModule } from './database/database.module';
+import { GuardModule } from './guard/guard.module';
 import { MailModule } from './mail/mail.module';
 import { MessageModule } from './message/message.module';
 import { UsersModule } from './users/users.module';
+import { AuthModule } from './auth/auth.module';
 
 @Module({
   imports: [
@@ -22,6 +24,8 @@ import { UsersModule } from './users/users.module';
     ConfigModule,
     MailModule,
     MessageModule,
+    GuardModule,
+    AuthModule,
   ],
 })
 export class AppModule {}
