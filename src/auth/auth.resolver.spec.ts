@@ -32,7 +32,7 @@ describe('AuthResolver', () => {
       imports: [
         GraphQLModule.forRoot<ApolloDriverConfig>({
           driver: ApolloDriver,
-          autoSchemaFile: 'schema.gql',
+          autoSchemaFile: 'test.gql',
         }),
         DatabaseModule,
         JwtModule.register({}),
