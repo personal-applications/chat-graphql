@@ -10,6 +10,10 @@ export class UserRepository {
     private readonly userRepository: Repository<User>,
   ) {}
 
+  findOneById(id: string) {
+    return this.userRepository.findOne({ where: { id } });
+  }
+
   findUserByEmail(email: string) {
     return this.userRepository.findOne({ where: { email } });
   }

@@ -37,4 +37,8 @@ export class User {
   @Field((type) => GraphQLISODateTime)
   @CreateDateColumn()
   createdAt: Date;
+
+  constructor(id?: string) {
+    this.id = id;
+  }
 }

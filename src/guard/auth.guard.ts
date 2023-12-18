@@ -5,13 +5,11 @@ import { Request } from 'express';
 import { GraphQLError } from 'graphql';
 import { ReasonPhrases, StatusCodes } from 'http-status-codes';
 import { CONFIG, Config } from 'src/config/config.provider';
-import { User } from 'src/users/models/user.model';
+import { CurrentUser } from 'src/decorator/current-user.decorator';
 
 declare module 'express' {
   interface Request {
-    user: {
-      email: string;
-    };
+    user: CurrentUser;
   }
 }
 
@@ -53,10 +51,15 @@ export class AuthGuard implements CanActivate {
 
     const jwt = req.headers.authorization.split(' ')[1];
     try {
-      const verified = this.jwtService.verify(jwt, { secret: this.config.jwtSecret });
-      req.user = verified as User;
+      const verifiedInfo = this.jwtService.verify(jwt, { secret: this.config.jwtSecret });
+      req.user = {
+        email: verifiedInfo.email,
+        id: verifiedInfo.sub,
+      };
+
       return true;
     } catch (e) {
+      console.error(e);
       throw new GraphQLError(ReasonPhrases.UNAUTHORIZED, {
         extensions: {
           code: StatusCodes.UNAUTHORIZED,
