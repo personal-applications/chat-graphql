@@ -59,7 +59,6 @@ export class AuthGuard implements CanActivate {
 
       return true;
     } catch (e) {
-      console.error(e);
       throw new GraphQLError(ReasonPhrases.UNAUTHORIZED, {
         extensions: {
           code: StatusCodes.UNAUTHORIZED,

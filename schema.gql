@@ -46,6 +46,7 @@ type Mutation {
 }
 
 type Query {
+  messages: [Message!]!
   users: [User!]!
 }
 

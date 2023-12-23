@@ -1,5 +1,5 @@
 import { UseGuards } from '@nestjs/common';
-import { Args, Mutation, Resolver } from '@nestjs/graphql';
+import { Args, Mutation, Query, Resolver } from '@nestjs/graphql';
 import { CurrentUser, currentUser } from 'src/decorator/current-user.decorator';
 import { AuthGuard } from 'src/guard/auth.guard';
 import { CreateMessageDto } from './dto/create-message.dto';
@@ -10,6 +10,9 @@ import { Message } from './models/message.model';
 @UseGuards(AuthGuard)
 export class MessageResolver {
   constructor(private readonly messageService: MessageService) {}
+
+  @Query((returns) => [Message])
+  messages() {}
 
   @Mutation((returns) => Message)
   createMessage(@Args('input') input: CreateMessageDto, @currentUser() user: CurrentUser) {

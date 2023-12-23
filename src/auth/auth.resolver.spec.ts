@@ -1,5 +1,5 @@
 import { ApolloDriver, ApolloDriverConfig } from '@nestjs/apollo';
-import { INestApplication, ValidationPipe } from '@nestjs/common';
+import { INestApplication } from '@nestjs/common';
 import { GraphQLModule } from '@nestjs/graphql';
 import { JwtModule, JwtService } from '@nestjs/jwt';
 import { Test } from '@nestjs/testing';
@@ -9,6 +9,7 @@ import { CONFIG, Config } from 'src/config/config.provider';
 import { MailService } from 'src/mail/mail.service';
 import { UserRepository } from 'src/users/users.repository';
 import { UsersService } from 'src/users/users.service';
+import { ValidationPipe } from 'src/validation/validation.pipe';
 import request from 'supertest';
 import { ConfigModule } from '../config/config.module';
 import { DatabaseModule } from '../database/database.module';
@@ -28,11 +29,13 @@ describe('AuthResolver', () => {
   let config: Config;
 
   beforeEach(async () => {
+    jest.clearAllMocks();
+
     const module = await Test.createTestingModule({
       imports: [
         GraphQLModule.forRoot<ApolloDriverConfig>({
           driver: ApolloDriver,
-          autoSchemaFile: 'test.gql',
+          autoSchemaFile: true,
         }),
         DatabaseModule,
         JwtModule.register({}),
@@ -52,8 +55,6 @@ describe('AuthResolver', () => {
         },
       ],
     }).compile();
-
-    jest.clearAllMocks();
 
     jwtService = module.get<JwtService>(JwtService);
     config = module.get<Config>(CONFIG);
